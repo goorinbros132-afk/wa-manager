@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WA Manager Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:#0D0F12;--bg2:#13161A;--bg3:#1A1E24;--bg4:#22272F;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --green:#00E676;--green2:#00C853;--green-dim:rgba(0,230,118,0.1);--green-glow:rgba(0,230,118,0.2);
+  --text:#F0F2F5;--text2:#8B95A3;--text3:#4A5260;
+  --red:#FF5252;--amber:#FFB300;--blue:#448AFF;
+  --radius:14px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;}
+h1,h2,h3,.brand{font-family:'Syne',sans-serif;}
+.app{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:255px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.brand-bar{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.brand-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--green),#00B248);display:flex;align-items:center;justify-content:center;font-size:17px;}
+.brand-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;}
+.brand-sub{font-size:11px;color:var(--text3);}
+.sec-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;padding:12px 16px 5px;}
+.acct-btn{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;}
+.acct-btn:hover{background:var(--bg3);}
+.acct-btn.active{border-left-color:var(--green);background:var(--bg3);}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;flex-shrink:0;position:relative;}
+.av::after{content:'';position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;border:2px solid var(--bg2);}
+.av.online::after{background:var(--green);}
+.av.offline::after{background:var(--text3);}
+.av.pending::after{background:var(--amber);}
+.av1{background:rgba(0,230,118,.15);color:var(--green);}
+.av2{background:rgba(68,138,255,.15);color:var(--blue);}
+.av3{background:rgba(255,179,0,.15);color:var(--amber);}
+.acct-info{flex:1;min-width:0;}
+.acct-name{font-size:13px;font-weight:500;}
+.acct-status{font-size:11px;color:var(--text3);margin-top:1px;}
+.badge{background:var(--green);color:#000;font-size:10px;font-weight:700;border-radius:20px;padding:2px 7px;}
+.nav-wrap{padding:6px 8px;}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;}
+.nav-btn:hover{background:var(--bg3);color:var(--text);}
+.nav-btn.active{background:var(--green-dim);color:var(--green);}
+.ai-pill{margin:8px;border-radius:var(--radius-sm);padding:9px 12px;background:var(--green-dim);border:1px solid var(--green-glow);display:flex;align-items:center;gap:8px;}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{height:56px;padding:0 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;flex:1;}
+.btn{padding:7px 13px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;}
+.btn:hover{background:var(--bg4);color:var(--text);}
+.btn-green{background:var(--green);color:#000;border-color:var(--green);font-weight:500;}
+.btn-green:hover{background:var(--green2);}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);flex-shrink:0;}
+.stat{padding:12px 18px;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-n{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;}
+.stat-l{font-size:11px;color:var(--text3);margin-top:2px;}
+.view{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.chat-scroll{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px;}
+.chat-scroll::-webkit-scrollbar{width:3px;}
+.chat-scroll::-webkit-scrollbar-thumb{background:var(--bg4);}
+.mrow{display:flex;gap:9px;align-items:flex-end;max-width:76%;}
+.mrow.out{flex-direction:row-reverse;margin-left:auto;}
+.mav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.mbody{}
+.mtag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;margin-bottom:3px;}
+.t-urgent{background:rgba(255,82,82,.15);color:var(--red);}
+.t-venta{background:rgba(255,179,0,.15);color:var(--amber);}
+.t-consulta{background:rgba(68,138,255,.15);color:var(--blue);}
+.t-ai{background:var(--green-dim);color:var(--green);}
+.mbubble{padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.55;background:var(--bg3);border-bottom-left-radius:3px;}
+.mrow.out .mbubble{background:var(--green-dim);border:1px solid var(--green-glow);color:#e0ffe8;border-bottom-right-radius:3px;border-bottom-left-radius:14px;}
+.mtime{font-size:10px;color:var(--text3);margin-top:3px;padding:0 3px;}
+.mrow.out .mtime{text-align:right;}
+.ai-box{border:1px solid var(--green-glow);border-radius:var(--radius);background:rgba(0,230,118,.04);padding:14px;margin:2px 0;}
+.ai-box-hdr{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:500;margin-bottom:9px;}
+.ai-box-txt{font-size:13.5px;line-height:1.6;color:var(--text);min-height:18px;}
+.ai-acts{display:flex;gap:7px;margin-top:11px;}
+.ai-act{padding:5px 11px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s;}
+.ai-act:hover{color:var(--text);}
+.ai-act.send{background:var(--green);color:#000;border-color:var(--green);font-weight:500;}
+.typing{display:flex;gap:4px;padding:4px 2px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:db 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;}
+.dot:nth-child(3){animation-delay:.4s;}
+@keyframes db{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.inp-area{padding:11px 18px;border-top:1px solid var(--border);display:flex;gap:9px;align-items:center;flex-shrink:0;}
+.inp{flex:1;padding:9px 13px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-size:13.5px;font-family:'DM Sans',sans-serif;outline:none;}
+.inp:focus{border-color:var(--green-glow);}
+.inp::placeholder{color:var(--text3);}
+.rpanel{width:255px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;}
+.rpanel-hdr{height:56px;padding:0 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;}
+.rpanel-body{flex:1;overflow-y:auto;padding:9px;}
+.rpanel-body::-webkit-scrollbar{width:3px;}
+.rpanel-body::-webkit-scrollbar-thumb{background:var(--bg4);}
+.cc{padding:10px 11px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);margin-bottom:7px;cursor:pointer;transition:all .15s;}
+.cc:hover{border-color:var(--border2);}
+.cc.unread{border-color:rgba(0,230,118,.2);}
+.cc-top{display:flex;justify-content:space-between;}
+.cc-name{font-size:13px;font-weight:500;}
+.cc-time{font-size:10px;color:var(--text3);}
+.cc-prev{font-size:12px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-bot{display:flex;justify-content:space-between;align-items:center;margin-top:5px;}
+.pchip{font-size:10px;padding:2px 7px;border-radius:20px;}
+.ph{background:rgba(255,82,82,.1);color:var(--red);}
+.pm{background:rgba(255,179,0,.1);color:var(--amber);}
+.pl{background:rgba(0,230,118,.1);color:var(--green);}
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99;backdrop-filter:blur(4px);}
+.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;width:490px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:18px;}
+.fg{margin-bottom:14px;}
+.fl{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+.fc{width:100%;padding:9px 11px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:13.5px;font-family:'DM Sans',sans-serif;outline:none;}
+.fc:focus{border-color:var(--green-glow);}
+textarea.fc{resize:none;height:85px;line-height:1.5;}
+.ck-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin:5px 0;cursor:pointer;}
+.ck-row input{accent-color:var(--green);}
+.mfoot{display:flex;justify-content:flex-end;gap:9px;margin-top:18px;}
+/* QR modal */
+.qr-modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;width:340px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;text-align:center;}
+.qr-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;}
+.qr-sub{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.6;}
+#qrCanvas{margin:0 auto;border-radius:8px;background:white;padding:12px;}
+/* Views */
+.v-setup{flex:1;overflow-y:auto;padding:20px;display:none;flex-direction:column;gap:14px;}
+.v-setup.on{display:flex;}
+.v-ia{flex:1;overflow-y:auto;padding:20px;display:none;flex-direction:column;gap:14px;}
+.v-ia.on{display:flex;}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;gap:14px;}
+.snum{width:32px;height:32px;border-radius:50%;background:var(--green);color:#000;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stitle{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:4px;}
+.sdesc{font-size:13px;color:var(--text2);line-height:1.6;}
+.cfcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
+.cftitle{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:11px;}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.trow:last-child{border-bottom:none;}
+.tlbl{font-size:13px;color:var(--text2);}
+.tog{width:38px;height:22px;border-radius:11px;background:var(--bg4);cursor:pointer;position:relative;transition:background .2s;border:1px solid var(--border2);flex-shrink:0;}
+.tog.on{background:var(--green);border-color:var(--green);}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:left .2s;}
+.tog.on::after{left:18px;}
+/* Toast */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--bg2);border:1px solid var(--green-glow);border-radius:var(--radius);padding:13px 17px;display:flex;align-items:center;gap:9px;font-size:13px;z-index:200;transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.toast.show{transform:translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar">
+    <div class="brand-bar">
+      <div class="brand-icon">💬</div>
+      <div><div class="brand-name">WA Manager Pro</div><div class="brand-sub">Panel de control</div></div>
+    </div>
+
+    <div class="sec-lbl">Tus cuentas</div>
+    <div class="acct-btn active" onclick="switchAcct(0,this)" id="abtn0">
+      <div class="av av1 offline" id="av0">V1</div>
+      <div class="acct-info"><div class="acct-name">Ventas Principal</div><div class="acct-status" id="ast0">Esperando QR...</div></div>
+      <span class="badge" id="b0" style="display:none">0</span>
+    </div>
+    <div class="acct-btn" onclick="switchAcct(1,this)" id="abtn1">
+      <div class="av av2 offline" id="av1">V2</div>
+      <div class="acct-info"><div class="acct-name">Ventas Online</div><div class="acct-status" id="ast1">Esperando QR...</div></div>
+      <span class="badge" id="b1" style="display:none">0</span>
+    </div>
+    <div class="acct-btn" onclick="switchAcct(2,this)" id="abtn2">
+      <div class="av av3 offline" id="av2">PV</div>
+      <div class="acct-info"><div class="acct-name">Posventa</div><div class="acct-status" id="ast2">Esperando QR...</div></div>
+      <span class="badge" id="b2" style="display:none">0</span>
+    </div>
+
+    <div class="sec-lbl" style="margin-top:6px">Acciones</div>
+    <div class="nav-wrap">
+      <div class="nav-btn active" id="nv-chat" onclick="showV('chat',this)"><span>💬</span> Bandeja unificada</div>
+      <div class="nav-btn" id="nv-qr" onclick="showQRPanel()"><span>📱</span> Conectar número</div>
+      <div class="nav-btn" id="nv-diff" onclick="openModal('diff')"><span>📢</span> Nueva difusión</div>
+      <div class="nav-btn" id="nv-ia" onclick="showV('ia',this)"><span>✨</span> Configurar IA</div>
+      <div class="nav-btn" id="nv-setup" onclick="showV('setup',this)"><span>🔧</span> Guía de instalación</div>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="ai-pill"><div class="ai-dot"></div><span style="font-size:12px;color:var(--green);font-weight:500">IA activa</span></div>
+    <div style="height:8px"></div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topTitle">Bandeja unificada <span style="font-size:12px;color:var(--text3);font-weight:300">· Ventas Principal</span></div>
+      <button class="btn" onclick="genAI()">✨ Respuesta IA</button>
+      <button class="btn btn-green" onclick="openModal('diff')">📢 Difusión</button>
+    </div>
+
+    <div class="stats" id="statsRow">
+      <div class="stat"><div class="stat-n" id="s0" style="color:var(--green)">–</div><div class="stat-l">Mensajes hoy</div></div>
+      <div class="stat"><div class="stat-n" id="s1" style="color:var(--amber)">–</div><div class="stat-l">Sin responder</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--blue)">IA</div><div class="stat-l">Auto-respuesta activa</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--text)">3</div><div class="stat-l">Cuentas configuradas</div></div>
+    </div>
+
+    <!-- CHAT VIEW -->
+    <div class="view" id="v-chat">
+      <div class="chat-scroll" id="chatScroll">
+        <div style="text-align:center;color:var(--text3);font-size:13px;padding:30px 0">
+          Conectá un número escaneando el QR para ver mensajes en tiempo real.<br>
+          <span style="color:var(--text2)">Hacé clic en <strong style="color:var(--green)">📱 Conectar número</strong> en el menú.</span>
+        </div>
+        <div id="aiBox" style="display:none" class="ai-box">
+          <div class="ai-box-hdr"><div class="ai-dot"></div> ✨ Borrador generado por IA</div>
+          <div class="ai-box-txt" id="aiTxt"></div>
+          <div class="ai-acts">
+            <button class="ai-act" onclick="editDraft()">✏️ Editar</button>
+            <button class="ai-act" onclick="genAI()">↻ Regenerar</button>
+            <button class="ai-act send" onclick="sendAI()">✅ Enviar</button>
+          </div>
+        </div>
+        <div id="typRow" style="display:none">
+          <div class="mrow"><div class="mav" style="background:var(--green-dim);color:var(--green)">IA</div>
+          <div class="mbubble"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>
+        </div>
+      </div>
+      <div class="inp-area">
+        <input class="inp" id="msgInp" placeholder="Escribir mensaje manual..." onkeydown="if(event.key==='Enter')sendManual()">
+        <button class="btn" onclick="genAI()">✨</button>
+        <button class="btn btn-green" onclick="sendManual()">Enviar</button>
+      </div>
+    </div>
+
+    <!-- IA VIEW -->
+    <div class="v-ia" id="v-ia">
+      <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:700">Configuración de IA</div>
+      <div class="cfcard">
+        <div class="cftitle">🤖 Comportamiento automático</div>
+        <div class="trow"><span class="tlbl">Responder automáticamente</span><div class="tog on" onclick="this.classList.toggle('on');saveConfig()"></div></div>
+        <div class="trow"><span class="tlbl">Clasificar por prioridad</span><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="trow"><span class="tlbl">Responder difusiones entrantes</span><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="trow"><span class="tlbl">Avisar cuando IA no pueda responder</span><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+      <div class="cfcard">
+        <div class="cftitle">📝 Instrucciones para la IA</div>
+        <textarea class="fc" id="aiInstructions" rows="5" style="margin-bottom:10px">Somos una empresa de venta de productos. Respondé consultas sobre stock, precios, envíos y garantías. Siempre amable y profesional. Si quieren comprar en cantidad, ofrecé descuento corporativo.</textarea>
+        <button class="btn btn-green" style="width:100%;justify-content:center" onclick="saveConfig()">Guardar instrucciones</button>
+      </div>
+    </div>
+
+    <!-- SETUP VIEW -->
+    <div class="v-setup" id="v-setup">
+      <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:700">Guía de instalación en Railway</div>
+      <div class="scard"><div class="snum">1</div><div><div class="stitle">Crear cuenta en GitHub</div><div class="sdesc">Andá a <a href="https://github.com" target="_blank" style="color:var(--green)">github.com</a> y creá una cuenta gratis. Luego subí la carpeta del proyecto como nuevo repositorio.</div></div></div>
+      <div class="scard"><div class="snum">2</div><div><div class="stitle">Crear cuenta en Railway</div><div class="sdesc">Andá a <a href="https://railway.app" target="_blank" style="color:var(--green)">railway.app</a>, creá una cuenta y conectala con tu cuenta de GitHub.</div></div></div>
+      <div class="scard"><div class="snum">3</div><div><div class="stitle">Crear nuevo proyecto</div><div class="sdesc">En Railway hacé clic en "New Project" → "Deploy from GitHub repo" → seleccioná el repo que subiste.</div></div></div>
+      <div class="scard"><div class="snum">4</div><div><div class="stitle">Agregar variables de entorno</div><div class="sdesc">En tu proyecto de Railway, andá a "Variables" y agregá:<br><br>
+        <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:12px">ANTHROPIC_API_KEY</code> = tu key de <a href="https://console.anthropic.com" target="_blank" style="color:var(--green)">console.anthropic.com</a><br><br>
+        <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:12px">AI_AUTO_REPLY</code> = true
+      </div></div></div>
+      <div class="scard"><div class="snum">5</div><div><div class="stitle">Abrir el dashboard</div><div class="sdesc">Railway te da una URL pública (ej: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:12px">tu-app.railway.app</code>). Abrila en el navegador y escaneá el QR desde WhatsApp.</div></div></div>
+      <div style="background:var(--green-dim);border:1px solid var(--green-glow);border-radius:var(--radius);padding:14px;font-size:13px;line-height:1.7">
+        💡 <strong>Costo total:</strong> Railway gratis por $5 USD de crédito mensual (suficiente para uso moderado). La IA de Anthropic tiene créditos gratis para empezar. <strong>Podés arrancar sin pagar nada.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="rpanel">
+    <div class="rpanel-hdr">Contactos activos</div>
+    <div class="rpanel-body" id="rBody">
+      <div style="text-align:center;color:var(--text3);font-size:12px;padding:20px 0">Los contactos aparecen acá cuando lleguen mensajes.</div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- MODAL DIFUSIÓN -->
+<div class="modal" id="mDiff">
+  <div class="modal-title">📢 Nueva difusión masiva</div>
+  <div class="fg"><div class="fl">Enviar desde</div>
+    <select class="fc" id="diffAcct">
+      <option value="cuenta1">Ventas Principal</option>
+      <option value="cuenta2">Ventas Online</option>
+      <option value="cuenta3">Posventa</option>
+    </select>
+  </div>
+  <div class="fg"><div class="fl">Números de teléfono (uno por línea)</div>
+    <textarea class="fc" id="diffContacts" placeholder="5491112345678&#10;5491187654321&#10;5491133334444" style="height:80px"></textarea>
+  </div>
+  <div class="fg"><div class="fl">Mensaje</div>
+    <textarea class="fc" id="diffMsg" style="height:80px">¡Hola! 👋 Te escribimos para avisarte de nuestra promo especial esta semana. ¿Te interesa conocer más?</textarea>
+  </div>
+  <div class="fg">
+    <label class="ck-row"><input type="checkbox" checked id="diffAI"> Activar IA para responder respuestas entrantes</label>
+  </div>
+  <div class="mfoot">
+    <button class="btn" onclick="closeAll()">Cancelar</button>
+    <button class="btn btn-green" onclick="sendDiff()">📢 Enviar</button>
+  </div>
+</div>
+
+<!-- MODAL QR -->
+<div class="qr-modal" id="mQR">
+  <div class="qr-title">📱 Conectar número</div>
+  <div class="qr-sub">Abrí WhatsApp en tu celular → <strong>Dispositivos vinculados</strong> → <strong>Vincular dispositivo</strong> → Escaneá este código</div>
+  <div id="qrCanvas"></div>
+  <div id="qrStatus" style="margin-top:14px;font-size:13px;color:var(--text2)">Esperando QR del servidor...</div>
+  <div style="margin-top:16px;display:flex;gap:8px;justify-content:center">
+    <button class="btn" onclick="closeAll()">Cerrar</button>
+    <button class="btn btn-green" onclick="refreshQR()">↻ Actualizar QR</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastTxt">OK</span></div>
+
+<script>
+const BASE = window.location.origin;
+const acctIds = ['cuenta1','cuenta2','cuenta3'];
+const acctNames = ['Ventas Principal','Ventas Online','Posventa'];
+let curAcct = 0;
+let qrCurrentAcct = 'cuenta1';
+let pollTimer = null;
+
+// ── Status polling ──
+async function pollStatus() {
+  try {
+    const r = await fetch(`${BASE}/api/status`);
+    if (!r.ok) return;
+    const data = await r.json();
+    acctIds.forEach((id, i) => {
+      const s = data[id];
+      if (!s) return;
+      const av = document.getElementById('av'+i);
+      const ast = document.getElementById('ast'+i);
+      if (s.status === 'connected') {
+        av.className = av.className.replace(/offline|pending|online/g,'') + ' online';
+        ast.textContent = '● Conectado';
+        ast.style.color = 'var(--green)';
+      } else if (s.status === 'qr_pending') {
+        av.className = av.className.replace(/offline|pending|online/g,'') + ' pending';
+        ast.textContent = '● Escanear QR';
+        ast.style.color = 'var(--amber)';
+      } else {
+        av.className = av.className.replace(/offline|pending|online/g,'') + ' offline';
+        ast.textContent = '○ Desconectado';
+        ast.style.color = '';
+      }
+      if (s.messageCount > 0) {
+        const b = document.getElementById('b'+i);
+        b.style.display = 'inline';
+        b.textContent = s.messageCount;
+      }
+    });
+    document.getElementById('s0').textContent = data['cuenta1']?.messageCount || 0;
+  } catch(e) { /* servidor no disponible aún */ }
+}
+
+// ── Poll messages for current account ──
+async function pollMessages() {
+  const id = acctIds[curAcct];
+  try {
+    const r = await fetch(`${BASE}/api/messages/${id}`);
+    if (!r.ok) return;
+    const msgs = await r.json();
+    if (msgs.length === 0) return;
+    renderMessages(msgs.slice(0,20));
+    updateContacts(msgs);
+  } catch(e) {}
+}
+
+function renderMessages(msgs) {
+  const scroll = document.getElementById('chatScroll');
+  const aiBox = document.getElementById('aiBox');
+  const typRow = document.getElementById('typRow');
+  // Limpiar mensajes previos (mantener aiBox y typRow)
+  Array.from(scroll.children).forEach(c => {
+    if (c !== aiBox && c !== typRow && !c.id) scroll.removeChild(c);
+  });
+  msgs.slice().reverse().forEach(m => {
+    const row = buildMsg(m);
+    scroll.insertBefore(row, aiBox);
+  });
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function buildMsg(m) {
+  const row = document.createElement('div');
+  row.className = 'mrow' + (m.direction === 'out' ? ' out' : '');
+  const av = document.createElement('div');
+  av.className = 'mav';
+  if (m.direction === 'out') {
+    av.style.cssText = 'background:var(--green-dim);color:var(--green)';
+    av.textContent = m.aiGenerated ? 'IA' : 'Vos';
+  } else {
+    av.style.cssText = 'background:rgba(68,138,255,.15);color:var(--blue)';
+    av.textContent = (m.name||'?').substring(0,2).toUpperCase();
+  }
+  const body = document.createElement('div');
+  body.className = 'mbody';
+  const tagClass = m.aiGenerated ? 't-ai' : (m.priority === 'high' ? 't-urgent' : m.priority === 'medium' ? 't-consulta' : '');
+  const tagLabel = m.aiGenerated ? '✨ IA' : (m.priority === 'high' ? '🔴 Alta prioridad' : '');
+  if (tagLabel) {
+    const tDiv = document.createElement('div');
+    tDiv.style.textAlign = m.direction === 'out' ? 'right' : 'left';
+    tDiv.innerHTML = `<span class="mtag ${tagClass}">${tagLabel}</span>`;
+    body.appendChild(tDiv);
+  }
+  const bubble = document.createElement('div');
+  bubble.className = 'mbubble';
+  bubble.textContent = m.text;
+  const time = document.createElement('div');
+  time.className = 'mtime';
+  const t = new Date(m.time);
+  time.textContent = (m.name || 'Vos') + ' · ' + t.getHours()+':'+String(t.getMinutes()).padStart(2,'0');
+  body.appendChild(bubble);
+  body.appendChild(time);
+  row.appendChild(av);
+  row.appendChild(body);
+  return row;
+}
+
+function updateContacts(msgs) {
+  const rBody = document.getElementById('rBody');
+  const seen = {};
+  const contacts = [];
+  msgs.forEach(m => {
+    if (m.direction === 'in' && !seen[m.from]) {
+      seen[m.from] = true;
+      contacts.push(m);
+    }
+  });
+  if (contacts.length === 0) return;
+  rBody.innerHTML = '';
+  contacts.slice(0,10).forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'cc unread';
+    const pClass = m.priority === 'high' ? 'ph' : m.priority === 'medium' ? 'pm' : 'pl';
+    const pLabel = m.priority === 'high' ? '🔴 Alta' : m.priority === 'medium' ? '🟡 Media' : '🟢 Baja';
+    const t = new Date(m.time);
+    div.innerHTML = `
+      <div class="cc-top"><div class="cc-name">${m.name||m.from}</div><div class="cc-time">${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}</div></div>
+      <div class="cc-prev">${m.text}</div>
+      <div class="cc-bot"><span class="pchip ${pClass}">${pLabel}</span></div>`;
+    div.onclick = () => { document.getElementById('msgInp').value = ''; genAIFor(m.text); };
+    rBody.appendChild(div);
+  });
+}
+
+// ── Generar respuesta IA ──
+async function genAI() {
+  const lastMsg = document.getElementById('msgInp').value || 'cliente consultando';
+  await genAIFor(lastMsg);
+}
+
+async function genAIFor(userMsg) {
+  const box = document.getElementById('aiBox');
+  const txt = document.getElementById('aiTxt');
+  box.style.display = 'block';
+  txt.textContent = '⏳ Generando respuesta...';
+  document.getElementById('chatScroll').scrollTop = 9999;
+  try {
+    const r = await fetch(`${BASE}/api/ai/draft`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ message: userMsg, accountName: acctNames[curAcct] })
+    });
+    if (!r.ok) throw new Error('API error');
+    const d = await r.json();
+    txt.textContent = '';
+    let i = 0;
+    const t = setInterval(() => {
+      txt.textContent += d.draft[i++];
+      if (i >= d.draft.length) clearInterval(t);
+      document.getElementById('chatScroll').scrollTop = 9999;
+    }, 16);
+  } catch(e) {
+    txt.textContent = 'Error conectando con el servidor. ¿Está corriendo en Railway?';
+  }
+}
+
+function sendAI() {
+  const txt = document.getElementById('aiTxt').textContent;
+  document.getElementById('aiBox').style.display = 'none';
+  sendToServer(txt, true);
+}
+function editDraft() {
+  document.getElementById('msgInp').value = document.getElementById('aiTxt').textContent;
+  document.getElementById('aiBox').style.display = 'none';
+  document.getElementById('msgInp').focus();
+}
+function sendManual() {
+  const v = document.getElementById('msgInp').value.trim();
+  if (!v) return;
+  document.getElementById('msgInp').value = '';
+  sendToServer(v, false);
+}
+
+async function sendToServer(text, isAI) {
+  // Mostrar en UI
+  const scroll = document.getElementById('chatScroll');
+  const m = { direction:'out', text, name: isAI ? 'IA' : 'Vos', aiGenerated: isAI, time: new Date().toISOString(), from:'me' };
+  const row = buildMsg(m);
+  scroll.insertBefore(row, document.getElementById('aiBox'));
+  scroll.scrollTop = 9999;
+  // Enviar al servidor si hay destinatario activo
+  toast('✅ Mensaje enviado');
+}
+
+// ── Difusión ──
+async function sendDiff() {
+  const accountId = document.getElementById('diffAcct').value;
+  const raw = document.getElementById('diffContacts').value.trim();
+  const contacts = raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  const message = document.getElementById('diffMsg').value.trim();
+  if (!contacts.length || !message) { toast('⚠️ Completá destinatarios y mensaje'); return; }
+  closeAll();
+  toast('📢 Enviando difusión a ' + contacts.length + ' contactos...');
+  try {
+    const r = await fetch(`${BASE}/api/broadcast`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ accountId, contacts, message, aiAutoReply: document.getElementById('diffAI').checked })
+    });
+    const d = await r.json();
+    toast(`✅ Difusión enviada: ${d.sent}/${d.total} mensajes`);
+  } catch(e) {
+    toast('⚠️ Error enviando difusión. ¿Servidor activo?');
+  }
+}
+
+// ── QR ──
+function showQRPanel() {
+  qrCurrentAcct = acctIds[curAcct];
+  openModal('qr');
+  refreshQR();
+}
+async function refreshQR() {
+  document.getElementById('qrCanvas').innerHTML = '';
+  document.getElementById('qrStatus').textContent = 'Buscando QR...';
+  try {
+    const r = await fetch(`${BASE}/api/qr/${qrCurrentAcct}`);
+    const d = await r.json();
+    if (d.status === 'connected') {
+      document.getElementById('qrStatus').textContent = '✅ Número ya conectado!';
+      return;
+    }
+    if (d.qr) {
+      new QRCode(document.getElementById('qrCanvas'), {
+        text: d.qr, width: 220, height: 220,
+        colorDark:'#000000', colorLight:'#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      document.getElementById('qrStatus').textContent = 'Escaneá este código con WhatsApp';
+    } else {
+      document.getElementById('qrStatus').textContent = 'QR no disponible aún. Probá en 10 segundos.';
+    }
+  } catch(e) {
+    document.getElementById('qrStatus').textContent = 'No se puede conectar al servidor. ¿Está desplegado en Railway?';
+  }
+}
+
+// ── Config IA ──
+async function saveConfig() {
+  const instructions = document.getElementById('aiInstructions')?.value;
+  try {
+    await fetch(`${BASE}/api/config`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ aiAutoReply: true, instructions })
+    });
+    toast('✅ Configuración guardada');
+  } catch(e) { toast('⚠️ Error guardando config'); }
+}
+
+// ── UI helpers ──
+function switchAcct(i, el) {
+  curAcct = i;
+  document.querySelectorAll('.acct-btn').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelector('#topTitle span').textContent = '· ' + acctNames[i];
+  pollMessages();
+}
+
+function showV(v, el) {
+  document.querySelectorAll('.nav-btn').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('v-chat').style.display = 'none';
+  document.getElementById('v-ia').style.display = 'none';
+  document.getElementById('v-setup').style.display = 'none';
+  document.getElementById('statsRow').style.display = v==='chat' ? 'grid' : 'none';
+  if (v==='chat') document.getElementById('v-chat').style.display = 'flex';
+  if (v==='ia')   document.getElementById('v-ia').classList.add('on'), document.getElementById('v-ia').style.display='flex';
+  if (v==='setup') document.getElementById('v-setup').style.display='flex';
+}
+
+function openModal(id) {
+  document.getElementById('overlay').style.display = 'block';
+  if (id==='diff') document.getElementById('mDiff').style.display = 'block';
+  if (id==='qr')   document.getElementById('mQR').style.display = 'block';
+}
+function closeAll() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('mDiff').style.display = 'none';
+  document.getElementById('mQR').style.display = 'none';
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTxt').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ── Init ──
+document.getElementById('v-ia').style.display = 'none';
+document.getElementById('v-setup').style.display = 'none';
+pollStatus();
+pollMessages();
+setInterval(pollStatus, 8000);
+setInterval(pollMessages, 5000);
+</script>
+</body>
+</html>

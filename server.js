@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const { EventEmitter } = require('events');
 const pino = require('pino');
@@ -44,17 +43,21 @@ async function createWAAccount(accountId, onMessage) {
 }
 
 async function askAI(userMessage, accountName) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const instructions = process.env.AI_INSTRUCTIONS || 'Sos un asistente de atención al cliente de una empresa de venta de productos. Respondé de forma amable y profesional en español argentino. Máximo 3 oraciones.';
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001', max_tokens: 300,
-      system: (process.env.AI_INSTRUCTIONS || 'Sos asistente de atención al cliente de una empresa de venta de productos. Respondé amable y brevemente en español argentino.') + ` Cuenta: ${accountName}.`,
-      messages: [{ role: 'user', content: userMessage }]
+      model: 'llama3-8b-8192',
+      max_tokens: 300,
+      messages: [
+        { role: 'system', content: `${instructions} Cuenta: ${accountName}.` },
+        { role: 'user', content: userMessage }
+      ]
     })
   });
   const d = await res.json();
-  return d.content[0].text;
+  return d.choices[0].message.content;
 }
 
 function classifyPriority(text = '') {
